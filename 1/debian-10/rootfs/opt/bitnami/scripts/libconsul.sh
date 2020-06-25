@@ -79,6 +79,8 @@ export CONSUL_SERF_LAN_ADDRESS="${CONSUL_SERF_LAN_ADDRESS:-0.0.0.0}"
 export CONSUL_SERF_LAN_PORT_NUMBER="${CONSUL_SERF_LAN_PORT_NUMBER:-8301}"
 export CONSUL_CLIENT_LAN_ADDRESS="${CONSUL_CLIENT_LAN_ADDRESS:-0.0.0.0}"
 export CONSUL_RETRY_JOIN_ADDRESS="${CONSUL_RETRY_JOIN_ADDRESS:-127.0.0.1}"
+export CONSUL_BIND_INTERFACE="${CONSUL_BIND_INTERFACE:-eth0}"
+export CONSUL_BIND_ADDR="$(get_bind_addr)"
 export CONSUL_ENABLE_UI="${CONSUL_ENABLE_UI:-true}"
 export CONSUL_BOOTSTRAP_EXPECT="${CONSUL_BOOTSTRAP_EXPECT:-1}"
 export CONSUL_RAFT_MULTIPLIER="${CONSUL_RAFT_MULTIPLIER:-1}"
@@ -234,5 +236,24 @@ get_consul_hostname() {
         echo "$CONSUL_NODE_NAME"
     else
         get_machine_ip
+    fi
+}
+
+########################
+# Determine the bind IP address for internal cluster communications from the given interface
+# Globals:
+#   CONSUL_BIND_INTERFACE
+# Arguments:
+#   None
+# Returns:
+#   The ip address of the given interface or "" (will be bound to all addresses)
+########################
+get_bind_addr() {
+    if [[ -n "$CONSUL_BIND_INTERFACE" ]]; then
+        CONSUL_BIND_ADDRESS=$(ip -o -4 addr list "$CONSUL_BIND_INTERFACE" | head -n1 | awk '{print $4}' | cut -d/ -f1)
+        echo "$CONSUL_BIND_ADDRESS"
+        if [[ -z "$CONSUL_BIND_ADDRESS" ]]; then
+            echo ""
+        fi
     fi
 }
