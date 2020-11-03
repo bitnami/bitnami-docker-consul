@@ -196,11 +196,6 @@ consul_configure_encryption() {
 
         if [[ -z ${CONSUL_GOSSIP_ENCRYPTION_KEY} ]]; then
             CONSUL_GOSSIP_ENCRYPTION_KEY=$("${CONSUL_BASE_DIR}/bin/consul" "keygen" )
-        elif ( base64 -d <<< "${CONSUL_GOSSIP_ENCRYPTION_KEY}" >/dev/null 2>&1 ); then
-            # The encryption key passed is already base64 , use it as it is
-            info "Using CONSUL_GOSSIP_ENCRYPTION_KEY as is"
-        else
-            CONSUL_GOSSIP_ENCRYPTION_KEY=$(base64 <<< "${CONSUL_GOSSIP_ENCRYPTION_KEY}")
         fi
 
         render-template "${CONSUL_ENCRYPT_TEMPLATE_FILE}" > "${CONSUL_ENCRYPT_FILE}"
